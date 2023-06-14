@@ -1,0 +1,55 @@
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Install aptitude
+      ansible.builtin.apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+
+    - name: Install required system packages
+      ansible.builtin.apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: latest
+        update_cache: true
+
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Install docker-compose
+      ansible.builtin.apt:
+        name: docker-compose
+        state: latest
+        update_cache: true
+
+    - name: Copy docker-compose and config to host
+      ansible.builtin.copy:
+        src: ../docker/
+        dest: /home/azure-admin/
+
+    - name: Launch docker-compose
+      ansible.builtin.command: docker-compose up -d --build
+      args:
+        chdir: /home/azure-admin/
+

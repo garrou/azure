@@ -1,0 +1,18 @@
+stages:
+  - deploy
+
+before_script:
+  - apt-get update
+  - apt-get install -y python3-pip
+  - pip3 install ansible
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - echo "${SSH_PRIVATE_KEY}" >> ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - echo "${SSH_HOST_KEY}" >> ~/.ssh/known_hosts
+
+deploy:
+  stage: deploy
+  script:
+    - ansible-playbook -i ansible/inventory ansible/playbook-docker.yml -u "${SSH_USER}" --private-key=~/.ssh/id_rsa
+
